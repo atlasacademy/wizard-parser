@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "SSpEXUw2MfpdhfjXfLr29aI7MDrrkhDFrr0/LEaj6aAwXU26EmKS4UQkMdlau2KuM6P04U8UZ1GewSjhuFgGsw==",
+  "success": true,
+  "projectFilePath": "D:\\Documents\\Programming\\VisualStudio\\WizardParser\\WizardParser\\WizardParser.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\M\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
