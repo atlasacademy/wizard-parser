@@ -18,11 +18,9 @@ jobs:
       with:
         dotnet-version: 3.1.301
     - name: Publish
-      run: dotnet publish -r win-x64 -c Release --self-contained
+      run: dotnet publish -r win-x64 -c Release -p:PublishSingleFile=true
     - name: Make folder and zip up
-      run: |
-       mkdir -p ./Rel/
-       zip -9 ./Rel/WizardParser.zip ./WizardParser/bin/Release/netcoreapp3.1/win-x64/publish/WizardParser.exe
+      run: zip -j -9 ./WizardParser.zip ./WizardParser/bin/Release/netcoreapp3.1/win-x64/publish/WizardParser.exe
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -40,6 +38,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Rel/WizardParser.zip
+        asset_path: ./WizardParser.zip
         asset_name: WizardParser.zip
         asset_content_type: application/zip
