@@ -6,16 +6,16 @@ namespace WizardParser
 {
     public class ClassRelation
     {
-        public ClassRelation(int id, Dictionary<int, int> ca)
+        public ClassRelation(int id, Dictionary<int, int> ca, int attack)
         {
             this.Id = id;
-            this.classAdvantage = ca;
-
+            this.ClassAdvantage = ca;
+            this.Attack = attack;
         }
         public int Id { get; set; }
-        
-        public Dictionary<int, int> classAdvantage { get; set; }
-        
+        public int Attack { get; set; }
+        public Dictionary<int, int> ClassAdvantage { get; set; }
+
     }
     public class Data
     {
@@ -36,7 +36,7 @@ namespace WizardParser
         public List<Np> nps = new List<Np>();
         public List<Np> npStrengthen = new List<Np>();
 
-        
+
         public Dictionary<string, int> cardGen;
         public Passive passive = new Passive();
 
@@ -77,5 +77,5 @@ namespace WizardParser
             npMod = 0;
         }
     }
-    
+
 }

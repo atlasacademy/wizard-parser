@@ -16,23 +16,29 @@ namespace WizardParser
             string nice_servant = web.DownloadString("https://api.atlasacademy.io/export/JP/nice_servant.json");
             string niceClassRelation = web.DownloadString("https://api.atlasacademy.io/export/JP/NiceClassRelation.json");
             string niceEnums = web.DownloadString("https://api.atlasacademy.io/export/JP/nice_enums.json");
+            string niceClassAttack = web.DownloadString("https://api.atlasacademy.io/export/JP/NiceClassAttackRate.json");
             JArray servantData = JsonConvert.DeserializeObject<JArray>(nice_servant);
             JObject classRelation = JsonConvert.DeserializeObject<JObject>(niceClassRelation);
             JObject enums = JsonConvert.DeserializeObject<JObject>(niceEnums);
+            JObject classAttack = JsonConvert.DeserializeObject<JObject>(niceClassAttack);
 
-            
+
             List<Servant> servants = new List<Servant>();//lists of servant
 
             List<string> usableClassNames = className(classRelation);//gets a list of the classes in niceClassRelation
 
             //creates a dictionary for the classes
             Dictionary<string, int> classId = enums["SvtClass"].ToObject<Dictionary<int, string>>().ToDictionary(x => x.Value, x => x.Key);
+
             //creates a dictionary for the attributes
             Dictionary<string, int> attribute = enums["Attribute"].ToObject<Dictionary<int, string>>().ToDictionary(x => x.Value, x => x.Key);
 
+            //creates a dictionary for their attacks
+            Dictionary<string, int> attack = classAttack.ToObject<Dictionary<string, int>>();
+
             Data data = new Data();
-            data.classRelation = CreateClassRelation(classRelation, usableClassNames, classId);
-            Console.WriteLine(JsonConvert.SerializeObject(data.classRelation, Formatting.Indented));
+            data.classRelation = CreateClassRelation(classRelation, usableClassNames, classId, attack);
+
             for (int i = 0; i < servantData.Count; ++i)
             {
                 if ((int)servantData[i]["bondEquip"] != 0)
@@ -41,9 +47,9 @@ namespace WizardParser
                     assignData(servants[servants.Count - 1], servantData[i], classId, usableClassNames, data.classRelation, attribute);
                 }
             }
-            
+
             data.servants = servants;
-            
+
             File.WriteAllText("data.json", JsonConvert.SerializeObject(data, Formatting.Indented));
         }
         public static List<string> className(JObject classRelation)
@@ -56,7 +62,7 @@ namespace WizardParser
             }
             return cn;
         }
-        public static List<ClassRelation> CreateClassRelation(JObject classRelation, List<string> ucs, Dictionary<string, int> classId)
+        public static List<ClassRelation> CreateClassRelation(JObject classRelation, List<string> ucs, Dictionary<string, int> classId, Dictionary<string, int> attack)
         {
             List<ClassRelation> tempList = new List<ClassRelation>();
 
@@ -68,13 +74,13 @@ namespace WizardParser
                     JObject t = (JObject)classRelation[ucs[j]];
 
                     tempDic.Add(classId[ucs[j]], t.ContainsKey(ucs[i]) ? (int)classRelation[ucs[i]][ucs[j]] : 1000);
-                   
+
                 }
-                tempList.Add(new ClassRelation(classId[ucs[i]], tempDic));
+                tempList.Add(new ClassRelation(classId[ucs[i]], tempDic, attack[ucs[i]]));
             }
 
             return tempList;
-        } 
+        }
         public static void assignData(Servant s, JToken d, Dictionary<string, int> classNames, List<string> ucs, List<ClassRelation> baseClassRelation, Dictionary<string, int> attributeAffinity)
         {
             s.id = Convert.ToInt32(d["collectionNo"]);
@@ -101,12 +107,12 @@ namespace WizardParser
 
             s.hasDamagingNp = funcNametoBool(d["noblePhantasms"]);
 
-            if (s.hasDamagingNp) 
+            if (s.hasDamagingNp)
             {
                 for(int i = 0; i < d["noblePhantasms"].Count(); ++i)
                 {
                     if(Convert.ToInt32(d["noblePhantasms"][i]["strengthStatus"]) == 2)
-                    {   
+                    {
                         s.npStrengthen.Add(npStruct(d["noblePhantasms"][i]));
 
                     }
@@ -135,12 +141,12 @@ namespace WizardParser
         }
         public static bool funcNametoBool(dynamic nps)
         {
-            for (int i = 0; i < nps.Count; ++i) 
+            for (int i = 0; i < nps.Count; ++i)
             {
                 for(int j = 0; j < nps[i]["functions"].Count; ++j)
                 {
                     string f = nps[i]["functions"][j]["funcType"];
-                    
+
                     if (f.Length >= 8 &&f.Substring(0, 8) == "damageNp") return true;
                 }
             }
@@ -150,7 +156,7 @@ namespace WizardParser
         public static Np npStruct(dynamic np)
         {
             Np n = new Np();
-            
+
                 n.npCardType = np["card"];
                 n.npGen = np["npGain"]["np"][0];
                 n.npHitPercentages = np["npDistribution"].ToObject<int[]>();
@@ -165,7 +171,7 @@ namespace WizardParser
                         }
                     }
                 }
-            
+
             return n;
         }
         public static Passive appendPassive(JToken passives, List<string> ucs, string servantClass, Dictionary<string, int> classNamesDic, List<ClassRelation> baseClassRelation)
@@ -177,7 +183,7 @@ namespace WizardParser
                 {
                     if((int)passives[i]["functions"][j]["funcId"] != 0)
                     {
-                        
+
                         if (Convert.ToString(passives[i]["functions"][j]["buffs"][0]["type"]) == "upCommandall")
                         {
                             int val = (int)passives[i]["functions"][j]["svals"][0]["Value"];
@@ -232,7 +238,7 @@ namespace WizardParser
                                         break;
                                 }
                             }
-                            
+
                         }//crit mod
 
                         if (Convert.ToString(passives[i]["functions"][j]["buffs"][0]["type"]) == "upNpDamage")
@@ -259,9 +265,8 @@ namespace WizardParser
                             Dictionary<int, int> currentClassAdvantage = null;
                             foreach (ClassRelation cr in baseClassRelation)
                             {
-                                if (cr.Id == classNamesDic[servantClass]) currentClassAdvantage = cr.classAdvantage;
+                                if (cr.Id == classNamesDic[servantClass]) currentClassAdvantage = cr.ClassAdvantage;
                             }
-                            Console.WriteLine(classNamesDic[servantClass]);
                             for (int k = 0; k < ucs.Count; ++k)
                             {
                                 JObject t = (JObject)passives[i]["functions"][j]["buffs"][0]["script"]["relationId"]["atkSide"][servantClass];
