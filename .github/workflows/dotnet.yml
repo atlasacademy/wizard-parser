@@ -25,8 +25,8 @@ jobs:
       run: dotnet publish -r win-x64 -c Release --self-contained
     - name: Make folder and zip up
       run: |
-       New-Item -ItemType directory -Path ./Rel/WizardParser
-       Compress-Archive -Path ./WizardParser/bin/Release/netcoreapp3.1/win-x64/publish/WizardParser.exe -CompressionLevel Optimal -DestinationPath ./Rel/WizardParser.zip
+       mkdir -r ./Rel/
+       zip -9 ./Rel/WizardParser.zip ./WizardParser/bin/Release/netcoreapp3.1/win-x64/publish/WizardParser.exe
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
