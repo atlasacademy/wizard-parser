@@ -17,11 +17,12 @@ namespace WizardParser
             string niceClassRelation = web.DownloadString("https://api.atlasacademy.io/export/JP/NiceClassRelation.json");
             string niceEnums = web.DownloadString("https://api.atlasacademy.io/export/JP/nice_enums.json");
             string niceClassAttack = web.DownloadString("https://api.atlasacademy.io/export/JP/NiceClassAttackRate.json");
+            string niceAttributeRelation = web.DownloadString("https://api.atlasacademy.io/export/JP/NiceAttributeRelation.json");
             JArray servantData = JsonConvert.DeserializeObject<JArray>(nice_servant);
             JObject classRelation = JsonConvert.DeserializeObject<JObject>(niceClassRelation);
             JObject enums = JsonConvert.DeserializeObject<JObject>(niceEnums);
             JObject classAttack = JsonConvert.DeserializeObject<JObject>(niceClassAttack);
-
+            JObject attributeRelation = JsonConvert.DeserializeObject<JObject>(niceAttributeRelation);
 
             List<Servant> servants = new List<Servant>();//lists of servant
 
@@ -38,7 +39,7 @@ namespace WizardParser
 
             Data data = new Data();
             data.classRelation = CreateClassRelation(classRelation, usableClassNames, classId, attack);
-
+            data.attributeRelation = CreateAttributeRelation(attributeRelation, attribute);
             for (int i = 0; i < servantData.Count; ++i)
             {
                 if ((int)servantData[i]["bondEquip"] != 0)
@@ -77,6 +78,30 @@ namespace WizardParser
 
                 }
                 tempList.Add(new ClassRelation(classId[ucs[i]], tempDic, attack[ucs[i]]));
+            }
+
+            return tempList;
+        }
+        public static List<AttributeRelation> CreateAttributeRelation(JObject attributeRelation, Dictionary<string, int> classId)
+        {
+            List<string> keys = new List<string>();
+            foreach(string s in classId.Keys)
+            {
+                keys.Add(s);
+            }
+            var tempList = new List<AttributeRelation>();
+
+            for (int i = 0; i < classId.Count; ++i)
+            {
+                var tempDic = new Dictionary<int, int>();
+                for (int j = 0; j < keys.Count; ++j)
+                {
+                    JObject t = (JObject)attributeRelation[keys[j]];
+
+                    tempDic.Add(classId[keys[j]], t.ContainsKey(keys[i]) ? (int)attributeRelation[keys[i]][keys[j]] : 1000);
+
+                }
+                tempList.Add(new AttributeRelation(classId[keys[i]], tempDic));
             }
 
             return tempList;

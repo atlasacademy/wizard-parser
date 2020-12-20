@@ -17,9 +17,20 @@ namespace WizardParser
         public Dictionary<int, int> ClassAdvantage { get; set; }
 
     }
+    public class AttributeRelation
+    {
+        public AttributeRelation(int id, Dictionary<int, int> aa)
+        {
+            this.Id = id;
+            this.AttributeAdvantage = aa;
+        }
+        public int Id { get; set; }
+        public Dictionary<int, int> AttributeAdvantage { get; set; }
+    }
     public class Data
     {
         public List<ClassRelation> classRelation { get; set; }
+        public List<AttributeRelation> attributeRelation { get; set; }
         public List<Servant> servants;
 
     }
