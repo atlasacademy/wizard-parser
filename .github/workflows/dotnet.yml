@@ -5,6 +5,9 @@ on:
   tags:
    - 'v*'
  workflow_dispatch:
+  inputs:
+   tags:
+    description: git tag for the release
 
 jobs:
   build:
@@ -27,8 +30,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tags || github.ref }}
+        release_name: Release ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tags || github.ref }}
         draft: false
         prerelease: false
     - name: Upload Release Asset
