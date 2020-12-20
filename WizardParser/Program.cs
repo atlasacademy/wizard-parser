@@ -104,7 +104,7 @@ namespace WizardParser
                         {"quick", d["hitsDistribution"]["quick"].ToObject<int[]>()},
                         {"extra", d["hitsDistribution"]["extra"].ToObject<int[]>()}
                     },
-                hasDamagingNp = funcNametoBool(d["noblePhantasms"]),
+                hasDamagingNp = funcNametoBool((JArray) d["noblePhantasms"]),
                 cardGen = new Dictionary<string, int>()
                 {
                     {"buster", (int) d["noblePhantasms"][0]["npGain"]["buster"][0]},
@@ -112,7 +112,7 @@ namespace WizardParser
                     {"quick", (int) d["noblePhantasms"][0]["npGain"]["quick"][0]},
                     {"extra", (int) d["noblePhantasms"][0]["npGain"]["extra"][0]}
                 },
-                passive = appendPassive(d["classPassive"], ucs, Convert.ToString(d["className"]), classNames,
+                passive = appendPassive(d["classPassive"], ucs, d["className"].ToString(), classNames,
                     baseClassRelation),
                 faceUrl = (string) d["extraAssets"]["faces"]["ascension"]["4"]
             };
@@ -124,114 +124,102 @@ namespace WizardParser
                 {
                     if(Convert.ToInt32(d["noblePhantasms"][i]["strengthStatus"]) == 2)
                     {
-                        s.npStrengthen.Add(npStruct(d["noblePhantasms"][i]));
+                        s.npStrengthen.Add(npStruct((JObject) d["noblePhantasms"][i]));
                     }
                     else
                     {
-                        s.nps.Add(npStruct(d["noblePhantasms"][i]));
+                        s.nps.Add(npStruct((JObject) d["noblePhantasms"][i]));
                     }
                 }
                 if (s.npStrengthen.Count == 0) s.npStrengthen = null;
-
             }
 
             return s;
         }
-        public static bool funcNametoBool(dynamic nps)
+        public static bool funcNametoBool(JArray nps)
         {
-            for (int i = 0; i < nps.Count; ++i)
-            {
-                for(int j = 0; j < nps[i]["functions"].Count; ++j)
-                {
-                    string f = nps[i]["functions"][j]["funcType"];
-
-                    if (f.Length >= 8 &&f.Substring(0, 8) == "damageNp") return true;
-                }
-            }
+            foreach (var np in nps)
+                foreach (var func in (JArray) np["functions"])
+                    if (func["funcType"].ToString().StartsWith("damageNp")) return true;
 
             return false;
         }
-        public static Np npStruct(dynamic np)
+        public static Np npStruct(JObject np)
         {
-            Np n = new Np();
-
-                n.npCardType = np["card"];
-                n.npGen = np["npGain"]["np"][0];
-                n.npHitPercentages = np["npDistribution"].ToObject<int[]>();
-                for (int j = 0; j < np["functions"].Count; ++j)
-                {
-                    string s = np["functions"][j]["funcType"];
-                    if (s.Length >= 8 && s.Substring(0,8) == "damageNp")
-                    {
-                        for (int k = 0; k < 5; ++k)
-                        {
-                            n.mods[k] = np["functions"][j]["svals"][k]["Value"];
-                        }
-                    }
-                }
+            var n = new Np
+            {
+                npCardType = (string)np["card"],
+                npGen = (int)np["npGain"]["np"][0],
+                npHitPercentages = np["npDistribution"].ToObject<int[]>()
+            };
+            foreach (var func in (JArray)np["functions"])
+            {
+                if (func["funcType"].ToString().StartsWith("damageNp"))
+                    n.mods = ((JArray) func["svals"]).Select(sval => sval.Value<int?>("Value") ?? default(int)).ToArray();
+            }
 
             return n;
         }
         public static Passive appendPassive(JToken passives, List<string> ucs, string servantClass, Dictionary<string, int> classNamesDic, List<ClassRelation> baseClassRelation)
         {
-            Passive passive = new Passive();
-            for(int i = 0; i < passives.Count(); ++i)
+            var _passive = new Passive();
+            foreach (var passive in passives)
             {
-                for(int j = 0; j < passives[i]["functions"].Count(); ++j)
+                for(int j = 0; j < passive["functions"].Count(); ++j)
                 {
-                    if((int)passives[i]["functions"][j]["funcId"] != 0)
+                    if((int)passive["functions"][j]["funcId"] != 0)
                     {
 
-                        if (Convert.ToString(passives[i]["functions"][j]["buffs"][0]["type"]) == "upCommandall")
+                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upCommandall")
                         {
-                            int val = (int)passives[i]["functions"][j]["svals"][0]["Value"];
-                            switch (Convert.ToString(passives[i]["functions"][j]["buffs"][0]["ckSelfIndv"][0]["name"]))
+                            var val = (int)passive["functions"][j]["svals"][0]["Value"];
+                            switch (passive["functions"][j]["buffs"][0]["ckSelfIndv"][0]["name"].ToString())
                             {
                                 case "cardQuick":
                                     {
-                                        passive.quickMod = val;
+                                        _passive.quickMod = val;
                                     }
                                     break;
                                 case "cardArts":
                                     {
-                                        passive.artsMod = val;
+                                        _passive.artsMod = val;
                                     }
                                     break;
                                 case "cardBuster":
                                     {
-                                        passive.busterMod = val;
+                                        _passive.busterMod = val;
                                     }
                                     break;
                             }
                         }////quick arts buster mod
 
-                        if (Convert.ToString(passives[i]["functions"][j]["buffs"][0]["type"]) == "upCriticaldamage")
+                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upCriticaldamage")
                         {
-                            int val = (int)passives[i]["functions"][j]["svals"][0]["Value"];
-                            if(passives[i]["functions"][j]["buffs"][0]["ckSelfIndv"].Count() != 0)
+                            var val = (int)passive["functions"][j]["svals"][0]["Value"];
+                            if(passive["functions"][j]["buffs"][0]["ckSelfIndv"].Count() != 0)
                             {
-                                switch (Convert.ToString(passives[i]["functions"][j]["buffs"][0]["ckSelfIndv"][0]["name"]))
+                                switch (passive["functions"][j]["buffs"][0]["ckSelfIndv"][0]["name"].ToString())
                                 {
                                     case "cardQuick":
                                         {
-                                            passive.critDamageMod["quick"] = val;
+                                            _passive.critDamageMod["quick"] = val;
                                         }
                                         break;
                                     case "cardArts":
                                         {
-                                            passive.critDamageMod["buster"] = val;
+                                            _passive.critDamageMod["buster"] = val;
                                         }
                                         break;
                                     case "cardBuster":
                                         {
-                                            passive.critDamageMod["buster"] = val;
+                                            _passive.critDamageMod["buster"] = val;
                                         }
                                         break;
                                     default:
                                         {
-                                            passive.critDamageMod["quick"] = val;
-                                            passive.critDamageMod["arts"] = val;
-                                            passive.critDamageMod["buster"] = val;
+                                            _passive.critDamageMod["quick"] = val;
+                                            _passive.critDamageMod["arts"] = val;
+                                            _passive.critDamageMod["buster"] = val;
                                         }
                                         break;
                                 }
@@ -239,44 +227,41 @@ namespace WizardParser
 
                         }//crit mod
 
-                        if (Convert.ToString(passives[i]["functions"][j]["buffs"][0]["type"]) == "upNpDamage")
+                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upNpDamage")
                         {
-                            int val = (int)passives[i]["functions"][j]["svals"][0]["Value"];
-                            passive.npMod = val;
+                            _passive.npMod = (int)passive["functions"][j]["svals"][0]["Value"];
                         }//np mod
 
-                        if (Convert.ToString(passives[i]["functions"][j]["buffs"][0]["type"]) == "addDamage")
+                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "addDamage")
                         {
-                            int val = (int)passives[i]["functions"][j]["svals"][0]["Value"];
-                            passive.flatDamage = val;
+                            _passive.flatDamage = (int)passive["functions"][j]["svals"][0]["Value"];
                         }//flat damage
 
-                        if (Convert.ToString(passives[i]["functions"][j]["buffs"][0]["type"]) == "upDropnp")
+                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upDropnp")
                         {
-                            int val = (int)passives[i]["functions"][j]["svals"][0]["Value"];
-                            passive.npGen = val;
+                            _passive.npGen = (int)passive["functions"][j]["svals"][0]["Value"];
                         }//np gain
 
-                        if (Convert.ToString(passives[i]["functions"][j]["buffs"][0]["type"]) == "overwriteClassRelation")
+                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "overwriteClassRelation")
                         {
 
                             Dictionary<int, int> currentClassAdvantage = null;
-                            foreach (ClassRelation cr in baseClassRelation)
+                            foreach (var cr in baseClassRelation)
                             {
                                 if (cr.Id == classNamesDic[servantClass]) currentClassAdvantage = cr.ClassAdvantage;
                             }
                             for (int k = 0; k < ucs.Count; ++k)
                             {
-                                JObject t = (JObject)passives[i]["functions"][j]["buffs"][0]["script"]["relationId"]["atkSide"][servantClass];
+                                var t = (JObject)passive["functions"][j]["buffs"][0]["script"]["relationId"]["atkSide"][servantClass];
                                 currentClassAdvantage[classNamesDic[ucs[k]]] = t.ContainsKey(ucs[k]) ? (int)t[ucs[k]]["damageRate"] : currentClassAdvantage[classNamesDic[ucs[k]]];
 
                             }
-                            passive.classOverride = currentClassAdvantage;
+                            _passive.classOverride = currentClassAdvantage;
                         }//overwrite class affinity
                     }
                 }
             }
-            return passive;
+            return _passive;
         }
     }
 }
