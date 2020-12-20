@@ -10,7 +10,7 @@ namespace WizardParser
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             WebClient web = new WebClient();
             string nice_servant = web.DownloadString("https://api.atlasacademy.io/export/JP/nice_servant.json");
@@ -24,113 +24,99 @@ namespace WizardParser
             JObject classAttack = JsonConvert.DeserializeObject<JObject>(niceClassAttack);
             JObject attributeRelation = JsonConvert.DeserializeObject<JObject>(niceAttributeRelation);
 
-            List<Servant> servants = new List<Servant>();//lists of servant
-
-            List<string> usableClassNames = className(classRelation);//gets a list of the classes in niceClassRelation
+            var usableClassNames = className(classRelation);//gets a list of the classes in niceClassRelation
 
             //creates a dictionary for the classes
-            Dictionary<string, int> classId = enums["SvtClass"].ToObject<Dictionary<int, string>>().ToDictionary(x => x.Value, x => x.Key);
+            var classId = enums["SvtClass"].ToObject<Dictionary<int, string>>().ToDictionary(x => x.Value, x => x.Key);
 
             //creates a dictionary for the attributes
-            Dictionary<string, int> attribute = enums["Attribute"].ToObject<Dictionary<int, string>>().ToDictionary(x => x.Value, x => x.Key);
+            var attribute = enums["Attribute"].ToObject<Dictionary<int, string>>().ToDictionary(x => x.Value, x => x.Key);
 
             //creates a dictionary for their attacks
-            Dictionary<string, int> attack = classAttack.ToObject<Dictionary<string, int>>();
+            var attack = classAttack.ToObject<Dictionary<string, int>>();
 
-            Data data = new Data();
-            data.classRelation = CreateClassRelation(classRelation, usableClassNames, classId, attack);
-            data.attributeRelation = CreateAttributeRelation(attributeRelation, attribute);
-            for (int i = 0; i < servantData.Count; ++i)
+            var classRelationList = CreateClassRelation(classRelation, usableClassNames, classId, attack);
+            var data = new Data
             {
-                if ((int)servantData[i]["bondEquip"] != 0)
-                {
-                    servants.Add(new Servant());
-                    assignData(servants[servants.Count - 1], servantData[i], classId, usableClassNames, data.classRelation, attribute);
-                }
-            }
-
-            data.servants = servants;
+                classRelation = classRelationList,
+                attributeRelation = CreateAttributeRelation(attributeRelation, attribute),
+                servants = servantData.Where(svt => svt.Value<int?>("bondEquip") != 0)
+                    .Select(svt => GenerateServant(svt, classId, usableClassNames, classRelationList, attribute))
+                    .ToList()
+            };
 
             File.WriteAllText("data.json", JsonConvert.SerializeObject(data, Formatting.Indented));
         }
         public static List<string> className(JObject classRelation)
         {
-            Dictionary<string, int> temp = classRelation["saber"].ToObject<Dictionary<string, int>>();
-            List<string> cn = new List<string>();
-            foreach (string s in temp.Keys)
-            {
-                cn.Add(s);
-            }
-            return cn;
+            return classRelation["saber"].ToObject<Dictionary<string, int>>().Keys.ToList();
         }
-        public static List<ClassRelation> CreateClassRelation(JObject classRelation, List<string> ucs, Dictionary<string, int> classId, Dictionary<string, int> attack)
+        public static List<ClassRelation> CreateClassRelation(JObject classRelation, List<string> usableClassNames, Dictionary<string, int> classId, Dictionary<string, int> attack)
         {
-            List<ClassRelation> tempList = new List<ClassRelation>();
-
-            for (int i = 0; i < ucs.Count; ++i)
+            var tempList = new List<ClassRelation>();
+            foreach (var firstClass in usableClassNames)
             {
                 var tempDic = new Dictionary<int, int>();
-                for (int j = 0; j < ucs.Count; ++j)
+                foreach (var secondClass in usableClassNames)
                 {
-                    JObject t = (JObject)classRelation[ucs[j]];
-
-                    tempDic.Add(classId[ucs[j]], t.ContainsKey(ucs[i]) ? (int)classRelation[ucs[i]][ucs[j]] : 1000);
-
+                    var t = (JObject)classRelation[secondClass];
+                    tempDic.Add(
+                        classId[secondClass],
+                        t.ContainsKey(firstClass) ? (int)classRelation[firstClass][secondClass] : 1000
+                    );
                 }
-                tempList.Add(new ClassRelation(classId[ucs[i]], tempDic, attack[ucs[i]]));
+                tempList.Add(new ClassRelation(classId[firstClass], tempDic, attack[firstClass]));
             }
 
             return tempList;
         }
-        public static List<AttributeRelation> CreateAttributeRelation(JObject attributeRelation, Dictionary<string, int> classId)
+        public static List<AttributeRelation> CreateAttributeRelation(JObject attributeRelation, Dictionary<string, int> attributeId)
         {
-            List<string> keys = new List<string>();
-            foreach(string s in classId.Keys)
-            {
-                keys.Add(s);
-            }
+            var keys = attributeId.Keys.ToList();
             var tempList = new List<AttributeRelation>();
 
-            for (int i = 0; i < classId.Count; ++i)
+            foreach (var attackerAttribute in keys)
             {
                 var tempDic = new Dictionary<int, int>();
-                for (int j = 0; j < keys.Count; ++j)
+                foreach (var defenderAttribute in keys)
                 {
-                    JObject t = (JObject)attributeRelation[keys[j]];
-
-                    tempDic.Add(classId[keys[j]], t.ContainsKey(keys[i]) ? (int)attributeRelation[keys[i]][keys[j]] : 1000);
-
+                    var t = (JObject)attributeRelation[defenderAttribute];
+                    tempDic.Add(attributeId[defenderAttribute], t.ContainsKey(attackerAttribute) ? (int)attributeRelation[attackerAttribute][defenderAttribute] : 1000);
                 }
-                tempList.Add(new AttributeRelation(classId[keys[i]], tempDic));
+                tempList.Add(new AttributeRelation(attributeId[attackerAttribute], tempDic));
             }
-
             return tempList;
         }
-        public static void assignData(Servant s, JToken d, Dictionary<string, int> classNames, List<string> ucs, List<ClassRelation> baseClassRelation, Dictionary<string, int> attributeAffinity)
+        public static Servant GenerateServant(JToken d, Dictionary<string, int> classNames, List<string> ucs, List<ClassRelation> baseClassRelation, Dictionary<string, int> attributeAffinity)
         {
-            s.id = Convert.ToInt32(d["collectionNo"]);
-
-            s.classId = classNames[(string)d["className"]];
-
-            s.attributeId = attributeAffinity[(string)d["attribute"]];
-
-            s.defaultLevelCap = Convert.ToInt32(d["lvMax"]);
-
-            s.atkPerLevel = d["atkGrowth"].ToObject<int[]>();
-
-
-            s.cardHitPercentages = new Dictionary<string, int[]>()
+            var s = new Servant
             {
-                {"buster", d["hitsDistribution"]["buster"].ToObject<int[]>() },
-
-                {"arts", d["hitsDistribution"]["arts"].ToObject<int[]>() },
-
-                {"quick", d["hitsDistribution"]["quick"].ToObject<int[]>() },
-
-                {"extra", d["hitsDistribution"]["extra"].ToObject<int[]>() }
+                id = (int) d["collectionNo"],
+                classId = classNames[(string) d["className"]],
+                attributeId = attributeAffinity[(string) d["attribute"]],
+                defaultLevelCap = (int) d["lvMax"],
+                atkPerLevel = d["atkGrowth"].ToObject<int[]>(),
+                cardHitPercentages =
+                    new Dictionary<string, int[]>()
+                    {
+                        {"buster", d["hitsDistribution"]["buster"].ToObject<int[]>()},
+                        {"arts", d["hitsDistribution"]["arts"].ToObject<int[]>()},
+                        {"quick", d["hitsDistribution"]["quick"].ToObject<int[]>()},
+                        {"extra", d["hitsDistribution"]["extra"].ToObject<int[]>()}
+                    },
+                hasDamagingNp = funcNametoBool(d["noblePhantasms"]),
+                cardGen = new Dictionary<string, int>()
+                {
+                    {"buster", (int) d["noblePhantasms"][0]["npGain"]["buster"][0]},
+                    {"arts", (int) d["noblePhantasms"][0]["npGain"]["arts"][0]},
+                    {"quick", (int) d["noblePhantasms"][0]["npGain"]["quick"][0]},
+                    {"extra", (int) d["noblePhantasms"][0]["npGain"]["extra"][0]}
+                },
+                passive = appendPassive(d["classPassive"], ucs, Convert.ToString(d["className"]), classNames,
+                    baseClassRelation),
+                faceUrl = (string) d["extraAssets"]["faces"]["ascension"]["4"]
             };
 
-            s.hasDamagingNp = funcNametoBool(d["noblePhantasms"]);
 
             if (s.hasDamagingNp)
             {
@@ -139,7 +125,6 @@ namespace WizardParser
                     if(Convert.ToInt32(d["noblePhantasms"][i]["strengthStatus"]) == 2)
                     {
                         s.npStrengthen.Add(npStruct(d["noblePhantasms"][i]));
-
                     }
                     else
                     {
@@ -150,19 +135,7 @@ namespace WizardParser
 
             }
 
-            s.cardGen = new Dictionary<string, int>()
-            {
-                {"buster", (int)d["noblePhantasms"][0]["npGain"]["buster"][0] },
-                {"arts", (int)d["noblePhantasms"][0]["npGain"]["arts"][0] },
-                {"quick", (int)d["noblePhantasms"][0]["npGain"]["quick"][0] },
-                {"extra", (int)d["noblePhantasms"][0]["npGain"]["extra"][0] }
-            };
-
-            s.passive = appendPassive(d["classPassive"], ucs, Convert.ToString(d["className"]), classNames, baseClassRelation);
-
-
-            s.faceUrl = Convert.ToString(d["extraAssets"]["faces"]["ascension"]["4"]);
-
+            return s;
         }
         public static bool funcNametoBool(dynamic nps)
         {
