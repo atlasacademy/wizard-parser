@@ -17,15 +17,11 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.301
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
     - name: Publish
       run: dotnet publish -r win-x64 -c Release --self-contained
     - name: Make folder and zip up
       run: |
-       mkdir -r ./Rel/
+       mkdir -p ./Rel/
        zip -9 ./Rel/WizardParser.zip ./WizardParser/bin/Release/netcoreapp3.1/win-x64/publish/WizardParser.exe
     - name: Create Release
       id: create_release
