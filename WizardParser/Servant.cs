@@ -50,7 +50,7 @@ namespace WizardParser
 
         public Dictionary<string, int> cardGen;
         public Passive passive = new Passive();
-
+        public bool hasTrait2632 = false;
         public string faceUrl;
 
     }

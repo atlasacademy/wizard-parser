@@ -155,7 +155,10 @@ namespace WizardParser
             foreach (var func in (JArray)np["functions"])
             {
                 if (func["funcType"].ToString().StartsWith("damageNp"))
-                    n.mods = ((JArray) func["svals"]).Select(sval => sval.Value<int?>("Value") ?? default(int)).ToArray();
+                {
+                    n.mods = ((JArray)func["svals"]).Select(sval => sval.Value<int?>("Value") ?? default(int)).ToArray();
+                    break;
+                }
             }
 
             return n;
