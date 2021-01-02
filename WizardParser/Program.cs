@@ -207,7 +207,7 @@ namespace WizardParser
                                         break;
                                     case "cardArts":
                                         {
-                                            _passive.critDamageMod["buster"] = val;
+                                            _passive.critDamageMod["arts"] = val;
                                         }
                                         break;
                                     case "cardBuster":
@@ -224,10 +224,16 @@ namespace WizardParser
                                         break;
                                 }
                             }
+                            else
+                            {
+                                _passive.critDamageMod["quick"] = val;
+                                _passive.critDamageMod["arts"] = val;
+                                _passive.critDamageMod["buster"] = val;
+                            }
 
                         }//crit mod
 
-                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upNpDamage")
+                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upNpdamage")
                         {
                             _passive.npMod = (int)passive["functions"][j]["svals"][0]["Value"];
                         }//np mod
