@@ -40,7 +40,7 @@ namespace WizardParser
             {
                 classRelation = classRelationList,
                 attributeRelation = CreateAttributeRelation(attributeRelation, attribute),
-                servants = servantData.Where(svt => svt.Value<int?>("bondEquip") != 0)
+                servants = servantData.Where(svt => svt.Value<string>("type") == "normal" || svt.Value<string>("type") == "heroine")
                     .Select(svt => GenerateServant(svt, classId, usableClassNames, classRelationList, attribute))
                     .ToList()
             };
