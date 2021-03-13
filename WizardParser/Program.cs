@@ -254,15 +254,16 @@ namespace WizardParser
                         if (passive["functions"][j]["buffs"][0]["type"].ToString() == "overwriteClassRelation")
                         {
 
-                            Dictionary<int, int> currentClassAdvantage = null;
+                            var currentClassAdvantage = new Dictionary<int, int> { };
+                            var baseClassAdvantage = new Dictionary<int, int> { };
                             foreach (var cr in baseClassRelation)
                             {
-                                if (cr.Id == classNamesDic[servantClass]) currentClassAdvantage = cr.ClassAdvantage;
+                                if (cr.Id == classNamesDic[servantClass]) baseClassAdvantage = cr.ClassAdvantage;
                             }
                             for (int k = 0; k < ucs.Count; ++k)
                             {
                                 var t = (JObject)passive["functions"][j]["buffs"][0]["script"]["relationId"]["atkSide"][servantClass];
-                                currentClassAdvantage[classNamesDic[ucs[k]]] = t.ContainsKey(ucs[k]) ? (int)t[ucs[k]]["damageRate"] : currentClassAdvantage[classNamesDic[ucs[k]]];
+                                currentClassAdvantage[classNamesDic[ucs[k]]] = t.ContainsKey(ucs[k]) ? (int)t[ucs[k]]["damageRate"] : baseClassAdvantage[classNamesDic[ucs[k]]];
 
                             }
                             _passive.classOverride = currentClassAdvantage;
