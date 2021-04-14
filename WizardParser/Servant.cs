@@ -45,8 +45,6 @@ namespace WizardParser
         public bool hasDamagingNp;
 
         public List<Np> nps = new List<Np>();
-        public List<Np> npStrengthen = new List<Np>();
-
 
         public Dictionary<string, int> cardGen;
         public Passive passive = new Passive();
@@ -58,6 +56,8 @@ namespace WizardParser
     public class Np
     {
         public string npCardType;
+        public int strengthStatus;
+        public int priority;
         public int[] npHitPercentages;
         public int npGen;
         public int[] mods = new int[5];

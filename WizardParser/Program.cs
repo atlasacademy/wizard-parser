@@ -117,21 +117,22 @@ namespace WizardParser
                 faceUrl = (string) d["extraAssets"]["faces"]["ascension"]["4"]
             };
 
+            var excludedNps = new HashSet<int> { 402501, 402504 };
 
-            if (s.hasDamagingNp)
+            if ((int)d["id"] == 200100)
+            {
+                s.nps.AddRange(new List<int> { 0, 3, 1, 2 }.Select(i => npStruct((JObject)d["noblePhantasms"][i])));
+            }
+            else if (s.hasDamagingNp)
             {
                 for(int i = 0; i < d["noblePhantasms"].Count(); ++i)
                 {
-                    if(Convert.ToInt32(d["noblePhantasms"][i]["strengthStatus"]) == 2)
+                    var np = (JObject)d["noblePhantasms"][i];
+                    if ((string)np["name"] != "？？？" && !excludedNps.Contains((int)np["id"]))
                     {
-                        s.npStrengthen.Add(npStruct((JObject) d["noblePhantasms"][i]));
-                    }
-                    else
-                    {
-                        s.nps.Add(npStruct((JObject) d["noblePhantasms"][i]));
+                        s.nps.Add(npStruct(np));
                     }
                 }
-                if (s.npStrengthen.Count == 0) s.npStrengthen = null;
             }
 
             return s;
@@ -149,6 +150,8 @@ namespace WizardParser
             var n = new Np
             {
                 npCardType = (string)np["card"],
+                strengthStatus = (int)np["strengthStatus"],
+                priority = (int)np["priority"],
                 npGen = (int)np["npGain"]["np"][0],
                 npHitPercentages = np["npDistribution"].ToObject<int[]>()
             };
