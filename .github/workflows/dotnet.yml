@@ -21,7 +21,7 @@ jobs:
       with:
         dotnet-version: 5.0.x
     - name: Publish
-      run: dotnet publish -r win-x64 -c Release -p:PublishSingleFile=true
+      run: dotnet publish -r win-x64 -c Release -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true
     - name: Make folder and zip up
       run: zip -j -9 ./WizardParser.zip ./WizardParser/bin/Release/netcoreapp5.0/win-x64/publish/WizardParser.exe
     - name: Create Release
