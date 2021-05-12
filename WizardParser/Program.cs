@@ -117,7 +117,7 @@ namespace WizardParser
                 faceUrl = (string) d["extraAssets"]["faces"]["ascension"]["4"]
             };
 
-            var excludedNps = new HashSet<int> { 402501, 402504 };
+            var excludedNps = new HashSet<int> { 101702, 402501, 402504 };
 
             if ((int)d["id"] == 200100)
             {
