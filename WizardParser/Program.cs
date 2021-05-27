@@ -121,7 +121,11 @@ namespace WizardParser
 
             if ((int)d["id"] == 200100)
             {
-                s.nps.AddRange(new List<int> { 0, 3, 1, 2 }.Select(i => npStruct((JObject)d["noblePhantasms"][i])));
+                foreach (int npId in new List<int> { 200101, 200102, 200198, 200197 })
+                {
+                    var np = (JObject)d["noblePhantasms"].First(np => (int)np["id"] == npId);
+                    s.nps.Add(npStruct(np));
+                }
             }
             else if (s.hasDamagingNp)
             {
