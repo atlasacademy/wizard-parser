@@ -72,7 +72,7 @@ namespace WizardParser
         }
         public static List<AttributeRelation> CreateAttributeRelation(JObject attributeRelation, Dictionary<string, int> attributeId)
         {
-            var keys = attributeId.Keys.ToList().Except(new string[]{ "void" });
+            var keys = attributeId.Keys.ToList().Except(new string[] { "void" });
             var tempList = new List<AttributeRelation>();
 
             foreach (var attackerAttribute in keys)
@@ -91,10 +91,10 @@ namespace WizardParser
         {
             var s = new Servant
             {
-                id = (int) d["collectionNo"],
-                classId = classNames[(string) d["className"]],
-                attributeId = attributeAffinity[(string) d["attribute"]],
-                defaultLevelCap = (int) d["lvMax"],
+                id = (int)d["collectionNo"],
+                classId = classNames[(string)d["className"]],
+                attributeId = attributeAffinity[(string)d["attribute"]],
+                defaultLevelCap = (int)d["lvMax"],
                 atkPerLevel = d["atkGrowth"].ToObject<int[]>(),
                 cardHitPercentages =
                     new Dictionary<string, int[]>()
@@ -104,7 +104,7 @@ namespace WizardParser
                         {"quick", d["hitsDistribution"]["quick"].ToObject<int[]>()},
                         {"extra", d["hitsDistribution"]["extra"].ToObject<int[]>()}
                     },
-                hasDamagingNp = funcNametoBool((JArray) d["noblePhantasms"]),
+                hasDamagingNp = funcNametoBool((JArray)d["noblePhantasms"]),
                 cardGen = new Dictionary<string, int>()
                 {
                     {"buster", (int) d["noblePhantasms"][0]["npGain"]["buster"][0]},
@@ -114,7 +114,7 @@ namespace WizardParser
                 },
                 passive = appendPassive(d["classPassive"], ucs, d["className"].ToString(), classNames,
                     baseClassRelation),
-                faceUrl = (string) d["extraAssets"]["faces"]["ascension"]["4"]
+                faceUrl = (string)d["extraAssets"]["faces"]["ascension"]["4"]
             };
 
             var excludedNps = new HashSet<int> { 101702, 402501, 402504 };
@@ -125,7 +125,7 @@ namespace WizardParser
             }
             else if (s.hasDamagingNp)
             {
-                for(int i = 0; i < d["noblePhantasms"].Count(); ++i)
+                for (int i = 0; i < d["noblePhantasms"].Count(); ++i)
                 {
                     var np = (JObject)d["noblePhantasms"][i];
                     if ((string)np["name"] != "？？？" && !excludedNps.Contains((int)np["id"]))
@@ -140,7 +140,7 @@ namespace WizardParser
         public static bool funcNametoBool(JArray nps)
         {
             foreach (var np in nps)
-                foreach (var func in (JArray) np["functions"])
+                foreach (var func in (JArray)np["functions"])
                     if (func["funcType"].ToString().StartsWith("damageNp")) return true;
 
             return false;
@@ -171,9 +171,9 @@ namespace WizardParser
             var _passive = new Passive();
             foreach (var passive in passives)
             {
-                for(int j = 0; j < passive["functions"].Count(); ++j)
+                for (int j = 0; j < passive["functions"].Count(); ++j)
                 {
-                    if((int)passive["functions"][j]["funcId"] != 0)
+                    if ((int)passive["functions"][j]["funcId"] != 0)
                     {
 
                         if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upCommandall")
@@ -202,7 +202,7 @@ namespace WizardParser
                         if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upCriticaldamage")
                         {
                             var val = (int)passive["functions"][j]["svals"][0]["Value"];
-                            if(passive["functions"][j]["buffs"][0]["ckSelfIndv"].Count() != 0)
+                            if (passive["functions"][j]["buffs"][0]["ckSelfIndv"].Count() != 0)
                             {
                                 switch (passive["functions"][j]["buffs"][0]["ckSelfIndv"][0]["name"].ToString())
                                 {
