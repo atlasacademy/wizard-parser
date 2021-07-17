@@ -187,17 +187,17 @@ namespace WizardParser
                             {
                                 case "cardQuick":
                                     {
-                                        _passive.quickMod = val;
+                                        _passive.quickMod += val;
                                     }
                                     break;
                                 case "cardArts":
                                     {
-                                        _passive.artsMod = val;
+                                        _passive.artsMod += val;
                                     }
                                     break;
                                 case "cardBuster":
                                     {
-                                        _passive.busterMod = val;
+                                        _passive.busterMod += val;
                                     }
                                     break;
                             }
@@ -212,50 +212,50 @@ namespace WizardParser
                                 {
                                     case "cardQuick":
                                         {
-                                            _passive.critDamageMod["quick"] = val;
+                                            _passive.critDamageMod["quick"] += val;
                                         }
                                         break;
                                     case "cardArts":
                                         {
-                                            _passive.critDamageMod["arts"] = val;
+                                            _passive.critDamageMod["arts"] += val;
                                         }
                                         break;
                                     case "cardBuster":
                                         {
-                                            _passive.critDamageMod["buster"] = val;
+                                            _passive.critDamageMod["buster"] += val;
                                         }
                                         break;
                                     default:
                                         {
-                                            _passive.critDamageMod["quick"] = val;
-                                            _passive.critDamageMod["arts"] = val;
-                                            _passive.critDamageMod["buster"] = val;
+                                            _passive.critDamageMod["quick"] += val;
+                                            _passive.critDamageMod["arts"] += val;
+                                            _passive.critDamageMod["buster"] += val;
                                         }
                                         break;
                                 }
                             }
                             else
                             {
-                                _passive.critDamageMod["quick"] = val;
-                                _passive.critDamageMod["arts"] = val;
-                                _passive.critDamageMod["buster"] = val;
+                                _passive.critDamageMod["quick"] += val;
+                                _passive.critDamageMod["arts"] += val;
+                                _passive.critDamageMod["buster"] += val;
                             }
 
                         }//crit mod
 
                         if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upNpdamage")
                         {
-                            _passive.npMod = (int)passive["functions"][j]["svals"][0]["Value"];
+                            _passive.npMod += (int)passive["functions"][j]["svals"][0]["Value"];
                         }//np mod
 
                         if (passive["functions"][j]["buffs"][0]["type"].ToString() == "addDamage")
                         {
-                            _passive.flatDamage = (int)passive["functions"][j]["svals"][0]["Value"];
+                            _passive.flatDamage += (int)passive["functions"][j]["svals"][0]["Value"];
                         }//flat damage
 
                         if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upDropnp")
                         {
-                            _passive.npGen = (int)passive["functions"][j]["svals"][0]["Value"];
+                            _passive.npGen += (int)passive["functions"][j]["svals"][0]["Value"];
                         }//np gain
 
                         if (passive["functions"][j]["buffs"][0]["type"].ToString() == "overwriteClassRelation")
