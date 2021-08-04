@@ -59,10 +59,11 @@ namespace WizardParser
                 var tempDic = new Dictionary<int, int>();
                 foreach (var secondClass in usableClassNames)
                 {
-                    var t = (JObject)classRelation[secondClass];
+                                       
+                    var t = (JObject)classRelation[firstClass];
                     tempDic.Add(
                         classId[secondClass],
-                        t.ContainsKey(firstClass) ? (int)classRelation[firstClass][secondClass] : 1000
+                        t.ContainsKey(secondClass) ? (int)classRelation[firstClass][secondClass] : 1000
                     );
                 }
                 tempList.Add(new ClassRelation(classId[firstClass], tempDic, attack[firstClass]));
