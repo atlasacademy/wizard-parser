@@ -13,7 +13,7 @@ namespace WizardParser
         static void Main()
         {
             WebClient web = new WebClient();
-            string nice_servant = web.DownloadString("https://api.atlasacademy.io/export/JP/nice_servant.json");
+            string nice_servant = web.DownloadString("https://api.atlasacademy.io/export/JP/nice_servant_lang_en.json");
             string niceClassRelation = web.DownloadString("https://api.atlasacademy.io/export/JP/NiceClassRelation.json");
             string niceEnums = web.DownloadString("https://api.atlasacademy.io/export/JP/nice_enums.json");
             string niceClassAttack = web.DownloadString("https://api.atlasacademy.io/export/JP/NiceClassAttackRate.json");
