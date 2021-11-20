@@ -100,22 +100,25 @@ namespace WizardParser
                 cardHitPercentages =
                     new Dictionary<string, int[]>()
                     {
-                        {"buster", d["hitsDistribution"]["buster"].ToObject<int[]>()},
-                        {"arts", d["hitsDistribution"]["arts"].ToObject<int[]>()},
-                        {"quick", d["hitsDistribution"]["quick"].ToObject<int[]>()},
-                        {"extra", d["hitsDistribution"]["extra"].ToObject<int[]>()}
+                        { "buster", d["hitsDistribution"]["buster"].ToObject<int[]>() },
+                        { "arts", d["hitsDistribution"]["arts"].ToObject<int[]>() },
+                        { "quick", d["hitsDistribution"]["quick"].ToObject<int[]>() },
+                        { "extra", d["hitsDistribution"]["extra"].ToObject<int[]>() }
                     },
                 hasDamagingNp = funcNametoBool((JArray)d["noblePhantasms"]),
                 cardGen = new Dictionary<string, int>()
                 {
-                    {"buster", (int) d["noblePhantasms"][0]["npGain"]["buster"][0]},
-                    {"arts", (int) d["noblePhantasms"][0]["npGain"]["arts"][0]},
-                    {"quick", (int) d["noblePhantasms"][0]["npGain"]["quick"][0]},
-                    {"extra", (int) d["noblePhantasms"][0]["npGain"]["extra"][0]}
+                    { "buster", (int)d["noblePhantasms"][0]["npGain"]["buster"][0] },
+                    { "arts", (int)d["noblePhantasms"][0]["npGain"]["arts"][0] },
+                    { "quick", (int)d["noblePhantasms"][0]["npGain"]["quick"][0] },
+                    { "extra", (int)d["noblePhantasms"][0]["npGain"]["extra"][0] }
                 },
                 passive = appendPassive(d["classPassive"], ucs, d["className"].ToString(), classNames,
                     baseClassRelation),
-                faceUrl = (string)d["extraAssets"]["faces"]["ascension"]["4"]
+                faceUrl = (string)d["extraAssets"]["faces"]["ascension"]["4"],
+                skillMats = d["skillMaterials"],
+                ascensionMats = d["ascensionMaterials"]
+                
             };
 
             var excludedNps = new HashSet<int> { 101702, 402501, 402504 };

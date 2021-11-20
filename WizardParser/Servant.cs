@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -45,12 +46,13 @@ namespace WizardParser
         public bool hasDamagingNp;
 
         public List<Np> nps = new List<Np>();
-
+        public JToken skillMats;
+        public JToken ascensionMats;
         public Dictionary<string, int> cardGen;
         public Passive passive = new Passive();
         public bool hasTrait2632 = false;
         public string faceUrl;
-
+        
     }
 
     public class Np
