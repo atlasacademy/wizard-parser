@@ -88,60 +88,72 @@ namespace WizardParser
             }
             return tempList;
         }
-        public static Servant GenerateServant(JToken d, Dictionary<string, int> classNames, List<string> ucs, List<ClassRelation> baseClassRelation, Dictionary<string, int> attributeAffinity)
+        public static Servant GenerateServant(JToken svt, Dictionary<string, int> classNames, List<string> ucs, List<ClassRelation> baseClassRelation, Dictionary<string, int> attributeAffinity)
         {
             var s = new Servant
             {
-                id = (int)d["collectionNo"],
-                classId = classNames[(string)d["className"]],
-                attributeId = attributeAffinity[(string)d["attribute"]],
-                defaultLevelCap = (int)d["lvMax"],
-                atkPerLevel = d["atkGrowth"].ToObject<int[]>(),
+                id = (int)svt["collectionNo"],
+                classId = classNames[(string)svt["className"]],
+                attributeId = attributeAffinity[(string)svt["attribute"]],
+                defaultLevelCap = (int)svt["lvMax"],
+                atkPerLevel = svt["atkGrowth"].ToObject<int[]>(),
                 cardHitPercentages =
                     new Dictionary<string, int[]>()
                     {
-                        { "buster", d["hitsDistribution"]["buster"].ToObject<int[]>() },
-                        { "arts", d["hitsDistribution"]["arts"].ToObject<int[]>() },
-                        { "quick", d["hitsDistribution"]["quick"].ToObject<int[]>() },
-                        { "extra", d["hitsDistribution"]["extra"].ToObject<int[]>() }
+                        { "buster", svt["hitsDistribution"]["buster"].ToObject<int[]>() },
+                        { "arts", svt["hitsDistribution"]["arts"].ToObject<int[]>() },
+                        { "quick", svt["hitsDistribution"]["quick"].ToObject<int[]>() },
+                        { "extra", svt["hitsDistribution"]["extra"].ToObject<int[]>() }
                     },
-                hasDamagingNp = funcNametoBool((JArray)d["noblePhantasms"]),
+                hasDamagingNp = funcNametoBool((JArray)svt["noblePhantasms"]),
                 cardGen = new Dictionary<string, int>()
                 {
-                    { "buster", (int)d["noblePhantasms"][0]["npGain"]["buster"][0] },
-                    { "arts", (int)d["noblePhantasms"][0]["npGain"]["arts"][0] },
-                    { "quick", (int)d["noblePhantasms"][0]["npGain"]["quick"][0] },
-                    { "extra", (int)d["noblePhantasms"][0]["npGain"]["extra"][0] }
+                    { "buster", (int)svt["noblePhantasms"][0]["npGain"]["buster"][0] },
+                    { "arts", (int)svt["noblePhantasms"][0]["npGain"]["arts"][0] },
+                    { "quick", (int)svt["noblePhantasms"][0]["npGain"]["quick"][0] },
+                    { "extra", (int)svt["noblePhantasms"][0]["npGain"]["extra"][0] }
                 },
-                passive = appendPassive(d["classPassive"], ucs, d["className"].ToString(), classNames,
+                passive = appendPassive(svt["classPassive"], ucs, svt["className"].ToString(), classNames,
                     baseClassRelation),
-                faceUrl = (string)d["extraAssets"]["faces"]["ascension"]["4"],
-                skillMats = d["skillMaterials"],
-                ascensionMats = d["ascensionMaterials"]
+                faceUrl = (string)svt["extraAssets"]["faces"]["ascension"]["4"],
+                skillMats = svt["skillMaterials"],
+                ascensionMats = svt["ascensionMaterials"]
                 
             };
 
-            var excludedNps = new HashSet<int> { 101702, 402501, 402504 };
-
-            if ((int)d["id"] == 200100)
+            
+            if (s.hasDamagingNp)
             {
-                foreach (int npId in new List<int> { 200101, 200102, 200198, 200197 })
+                for (int i = 0; i < svt["noblePhantasms"].Count(); ++i)
                 {
-                    var np = (JObject)d["noblePhantasms"].First(np => (int)np["id"] == npId);
-                    s.nps.Add(npStruct(np));
-                }
-            }
-            else if (s.hasDamagingNp)
-            {
-                for (int i = 0; i < d["noblePhantasms"].Count(); ++i)
-                {
-                    var np = (JObject)d["noblePhantasms"][i];
-                    if ((string)np["name"] != "？？？" && !excludedNps.Contains((int)np["id"]))
+                    var np = (JObject)svt["noblePhantasms"][i];
+                    var n = npStruct(np);
+                    if (s.nps.FirstOrDefault(x => x.mods.SequenceEqual(n.mods)) is null)
                     {
-                        s.nps.Add(npStruct(np));
+                        s.nps.Add(n);
                     }
                 }
             }
+            //var excludedNps = new HashSet<int> { 101702, 402501, 402504 };
+            //if ((int)svt["id"] == 200100)
+            //{
+            //    foreach (int npId in new List<int> { 200101, 200102, 200198, 200197 })
+            //    {
+            //        var np = (JObject)svt["noblePhantasms"].First(np => (int)np["id"] == npId);
+            //        s.nps.Add(npStruct(np));
+            //    }
+            //}
+            //else if (s.hasDamagingNp)
+            //{
+            //    for (int i = 0; i < svt["noblePhantasms"].Count(); ++i)
+            //    {
+            //        var np = (JObject)svt["noblePhantasms"][i];
+            //        if ((string)np["name"] != "？？？" && !excludedNps.Contains((int)np["id"]))
+            //        {
+            //            s.nps.Add(npStruct(np));
+            //        }
+            //    }
+            //}
 
             return s;
         }
