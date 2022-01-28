@@ -128,7 +128,8 @@ namespace WizardParser
                 {
                     var np = (JObject)svt["noblePhantasms"][i];
                     var n = npStruct(np);
-                    if (s.nps.FirstOrDefault(x => x.mods.SequenceEqual(n.mods)) is null)
+                    var r = s.nps.FirstOrDefault(x => x.mods.SequenceEqual(n.mods));
+                    if ((r is null) || (r is not null && r.npCardType != n.npCardType))
                     {
                         s.nps.Add(n);
                     }
