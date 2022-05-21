@@ -18,7 +18,7 @@ namespace WizardParser
             string niceEnums = web.DownloadString("https://api.atlasacademy.io/export/JP/nice_enums.json");
             string niceClassAttack = web.DownloadString("https://api.atlasacademy.io/export/JP/NiceClassAttackRate.json");
             string niceAttributeRelation = web.DownloadString("https://api.atlasacademy.io/export/JP/NiceAttributeRelation.json");
-            
+
             JArray servantData = JsonConvert.DeserializeObject<JArray>(nice_servant);
             JObject classRelation = JsonConvert.DeserializeObject<JObject>(niceClassRelation);
             JObject enums = JsonConvert.DeserializeObject<JObject>(niceEnums);
@@ -60,7 +60,7 @@ namespace WizardParser
                 var tempDic = new Dictionary<int, int>();
                 foreach (var secondClass in usableClassNames)
                 {
-                                       
+
                     var t = (JObject)classRelation[firstClass];
                     tempDic.Add(
                         classId[secondClass],
@@ -118,11 +118,12 @@ namespace WizardParser
                     baseClassRelation),
                 faceUrl = (string)svt["extraAssets"]["faces"]["ascension"]["4"],
                 skillMats = svt["skillMaterials"],
+                appendMats = svt["appendSkillMaterials"],
                 ascensionMats = svt["ascensionMaterials"]
-                
+
             };
 
-            
+
             if (s.hasDamagingNp)
             {
                 for (int i = 0; i < svt["noblePhantasms"].Count(); ++i)
