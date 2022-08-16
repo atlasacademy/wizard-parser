@@ -211,8 +211,10 @@ namespace WizardParser
                 {
                     if ((int)passive["functions"][j]["funcId"] != 0)
                     {
+                        if (((JArray)passive["functions"][j]["buffs"]).Count == 0) continue;
+                        string buffType = passive["functions"][j]["buffs"][0]["type"].ToString();
 
-                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upCommandall")
+                        if (buffType == "upCommandall")
                         {
                             var val = (int)passive["functions"][j]["svals"][0]["Value"];
                             switch (passive["functions"][j]["buffs"][0]["ckSelfIndv"][0]["name"].ToString())
@@ -235,7 +237,7 @@ namespace WizardParser
                             }
                         }////quick arts buster mod
 
-                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upCriticaldamage")
+                        if (buffType == "upCriticaldamage")
                         {
                             var val = (int)passive["functions"][j]["svals"][0]["Value"];
                             if (passive["functions"][j]["buffs"][0]["ckSelfIndv"].Count() != 0)
@@ -275,22 +277,22 @@ namespace WizardParser
 
                         }//crit mod
 
-                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upNpdamage")
+                        if (buffType == "upNpdamage")
                         {
                             _passive.npMod += (int)passive["functions"][j]["svals"][0]["Value"];
                         }//np mod
 
-                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "addDamage")
+                        if (buffType == "addDamage")
                         {
                             _passive.flatDamage += (int)passive["functions"][j]["svals"][0]["Value"];
                         }//flat damage
 
-                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "upDropnp")
+                        if (buffType == "upDropnp")
                         {
                             _passive.npGen += (int)passive["functions"][j]["svals"][0]["Value"];
                         }//np gain
 
-                        if (passive["functions"][j]["buffs"][0]["type"].ToString() == "overwriteClassRelation")
+                        if (buffType == "overwriteClassRelation")
                         {
 
                             var currentClassAdvantage = new Dictionary<int, int> { };
