@@ -15,15 +15,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 8
     - name: Publish
-      run: dotnet publish -r win-x64 -c Release -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+      run: dotnet publish -r win-x64 -c Release
     - name: Make folder and zip up
-      run: zip -j -9 ./WizardParser.zip ./WizardParser/bin/Release/netcoreapp5.0/win-x64/publish/WizardParser.exe
+      run: zip -j -9 ./WizardParser.zip ./WizardParser/bin/Release/net8.0/win-x64/publish/WizardParser.exe
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1

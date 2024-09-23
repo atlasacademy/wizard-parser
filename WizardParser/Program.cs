@@ -1,23 +1,34 @@
 ﻿using System;
 using System.Linq;
 using Newtonsoft.Json;
-using System.Net;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json.Linq;
+using System.Net.Http;
 
 namespace WizardParser
 {
     class Program
     {
+        static readonly HttpClient client = new HttpClient();
+
+        public static string GetStringSync(string url)
+        {
+            var webRequest = new HttpRequestMessage(HttpMethod.Get, url) { };
+            var response = client.Send(webRequest);
+            using var reader = new StreamReader(response.Content.ReadAsStream());
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
         static void Main()
         {
-            WebClient web = new WebClient();
-            string nice_servant = web.DownloadString("https://api.atlasacademy.io/export/JP/nice_servant_lang_en.json");
-            string niceClassRelation = web.DownloadString("https://api.atlasacademy.io/export/JP/NiceClassRelation.json");
-            string niceEnums = web.DownloadString("https://api.atlasacademy.io/export/JP/nice_enums.json");
-            string niceClassAttack = web.DownloadString("https://api.atlasacademy.io/export/JP/NiceClassAttackRate.json");
-            string niceAttributeRelation = web.DownloadString("https://api.atlasacademy.io/export/JP/NiceAttributeRelation.json");
+            string nice_servant = GetStringSync("https://api.atlasacademy.io/export/JP/nice_servant_lang_en.json");
+            string niceClassRelation = GetStringSync("https://api.atlasacademy.io/export/JP/NiceClassRelation.json");
+            string niceEnums = GetStringSync("https://api.atlasacademy.io/export/JP/nice_enums.json");
+            string niceClassAttack = GetStringSync("https://api.atlasacademy.io/export/JP/NiceClassAttackRate.json");
+            string niceAttributeRelation = GetStringSync("https://api.atlasacademy.io/export/JP/NiceAttributeRelation.json");
 
             JArray servantData = JsonConvert.DeserializeObject<JArray>(nice_servant);
             JObject classRelation = JsonConvert.DeserializeObject<JObject>(niceClassRelation);
@@ -140,8 +151,7 @@ namespace WizardParser
             else if (s.id == 336)
             {
                 s.hasDamagingNp = true;
-                var web = new WebClient();
-                string bazettNp = web.DownloadString("https://api.atlasacademy.io/nice/JP/NP/1001150");
+                string bazettNp = GetStringSync("https://api.atlasacademy.io/nice/JP/NP/1001150");
                 var n = npStruct(JsonConvert.DeserializeObject<JObject>(bazettNp));
                 var r = s.nps.FirstOrDefault(x => x.mods.SequenceEqual(n.mods));
                 if ((r is null) || (r is not null && r.npCardType != n.npCardType))
