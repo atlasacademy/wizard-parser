@@ -85,7 +85,7 @@ namespace WizardParser
         }
         public static List<AttributeRelation> CreateAttributeRelation(JObject attributeRelation, Dictionary<string, int> attributeId)
         {
-            var keys = attributeId.Keys.ToList().Except(new string[] { "void" });
+            var keys = attributeId.Keys.ToList().Except(new string[] { "void", "none", "default" });
             var tempList = new List<AttributeRelation>();
 
             foreach (var attackerAttribute in keys)
